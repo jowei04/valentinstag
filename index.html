@@ -53,9 +53,17 @@
     .timer strong { opacity: 1; }
 
     .buttons {
-      position: relative;
-      height: 90px;
-      margin-top: 22px;
+  position: relative;
+  margin-top: 22px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+
+  min-height: 70px; /* Platz für springenden Nein-Button */
+}
+
     }
 
     button {
@@ -392,6 +400,7 @@ const timerText = ({ days, hours, mins }) =>
 
 </body>
 </html>
+
 
 
 
