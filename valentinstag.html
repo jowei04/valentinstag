@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>💘 Eine wichtige Frage 💘</title>
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      overflow: auto;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.93);
+      border-radius: 26px;
+      padding: 28px 24px;
+      text-align: center;
+      width: min(520px, 92vw);
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      position: relative;
+      z-index: 2;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: clamp(22px, 5vw, 32px);
+    }
+
+    p {
+      font-size: 16px;
+      opacity: 0.85;
+    }
+
+    .buttons {
+      position: relative;
+      height: 80px;
+      margin-top: 22px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 14px 20px;
+      border-radius: 16px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0,0,0,.18);
+      user-select: none;
+    }
+
+    #yes {
+      background: #22c55e;
+      color: white;
+    }
+
+    #no {
+      background: #ef4444;
+      color: white;
+      position: absolute;
+      left: 55%;
+      top: 0;
+    }
+
+    .result {
+      display: none;
+      margin-top: 22px;
+      animation: pop .4s ease;
+    }
+
+    @keyframes pop {
+      from { transform: scale(.9); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .photo {
+      margin-top: 16px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 14px 35px rgba(0,0,0,.25);
+    }
+
+    .photo img {
+      width: 100%;
+      display: block;
+    }
+
+    /* Herzen */
+    .heart {
+      position: fixed;
+      font-size: 20px;
+      animation: floatUp 2.5s ease forwards;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes floatUp {
+      from {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(-120px) scale(1.6);
+        opacity: 0;
+      }
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<canvas id="confetti"></canvas>
+
+<audio id="yaySound" src="yay.mp3" preload="auto"></audio>
+
+<div class="card">
+  <h1>Hey schatz 💕</h1>
+  <p><strong>Willst du mein Valentinstag-Date sein?</strong></p>
+
+  <div class="buttons" id="arena">
+    <button id="yes">Ja 😍</button>
+    <button id="no">Nein 🙃</button>
+  </div>
+
+  <div class="result" id="result">
+    <h2>YAAIIIII 😍💘</h2>
+    <p>Ich liebe dich schatz 💞</p>
+
+    <div class="photo">
+      <img src="ja.jpeg" alt="Wir zwei 💕">
+    </div>
+
+    <p style="font-size:12px; opacity:.6; margin-top:10px;">
+      (Der Nein-Button hatte nie eine echte Chance 😌)
+    </p>
+  </div>
+</div>
+
+<script>
+  const noBtn = document.getElementById("no");
+  const yesBtn = document.getElementById("yes");
+  const arena = document.getElementById("arena");
+  const result = document.getElementById("result");
+  const sound = document.getElementById("yaySound");
+
+  let difficulty = 1;
+  let lastMove = 0;
+
+  function placeNo(x = null, y = null) {
+    const r = arena.getBoundingClientRect();
+    const b = noBtn.getBoundingClientRect();
+    const maxX = r.width - b.width;
+    const maxY = r.height - b.height;
+    noBtn.style.left = (x ?? Math.random() * maxX) + "px";
+    noBtn.style.top  = (y ?? Math.random() * maxY) + "px";
+  }
+
+  function evade(px, py) {
+    const now = performance.now();
+    const cooldown = Math.max(0, 120 - difficulty * 6);
+    if (now - lastMove < cooldown) return;
+    lastMove = now;
+
+    difficulty += 0.35;
+
+    const r = arena.getBoundingClientRect();
+    const b = noBtn.getBoundingClientRect();
+    const minDist = 120 + difficulty * 10;
+
+    let x, y;
+    for (let i = 0; i < 40; i++) {
+      x = Math.random() * (r.width - b.width);
+      y = Math.random() * (r.height - b.height);
+      const cx = r.left + x + b.width / 2;
+      const cy = r.top + y + b.height / 2;
+      if (Math.hypot(cx - px, cy - py) > minDist) break;
+    }
+    placeNo(x, y);
+  }
+
+  noBtn.addEventListener("mouseenter", e => evade(e.clientX, e.clientY));
+  noBtn.addEventListener("mousemove", e => evade(e.clientX, e.clientY));
+  noBtn.addEventListener("touchstart", e => {
+    const t = e.touches[0];
+    evade(t.clientX, t.clientY);
+    e.preventDefault();
+  }, { passive: false });
+
+  yesBtn.addEventListener("click", () => {
+    result.style.display = "block";
+    yesBtn.disabled = true;
+    noBtn.disabled = true;
+    sound.currentTime = 0;
+    sound.play();
+    startConfetti();
+    spawnHearts();
+  });
+
+  placeNo();
+
+  /* 🎉 Konfetti */
+  const canvas = document.getElementById("confetti");
+  const ctx = canvas.getContext("2d");
+  function resize() {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  function startConfetti() {
+    const pieces = Array.from({length: 160}, () => ({
+      x: Math.random() * innerWidth,
+      y: -20,
+      vy: 2 + Math.random() * 4,
+      vx: -1 + Math.random() * 2,
+      r: 3 + Math.random() * 4,
+      h: Math.random() * 360
+    }));
+
+    function tick() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      pieces.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        ctx.fillStyle = `hsl(${p.h} 90% 70%)`;
+        ctx.fillRect(p.x, p.y, p.r, p.r);
+      });
+      if (pieces.some(p => p.y < innerHeight)) requestAnimationFrame(tick);
+    }
+    tick();
+  }
+
+  /* 💕 Herzen */
+  function spawnHearts() {
+    for (let i = 0; i < 24; i++) {
+      const heart = document.createElement("div");
+      heart.className = "heart";
+      heart.textContent = "💖";
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.top = "70vh";
+      heart.style.animationDelay = (Math.random() * 0.6) + "s";
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 2600);
+    }
+  }
+</script>
+
+</body>
+</html>
