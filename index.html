@@ -186,6 +186,10 @@
   // Format: new Date(JAHR, MONAT-1, TAG, STUNDE, MINUTE)
   // Beispiel: 14. Feb 2026, 19:00
   const targetDate = new Date(2026, 2, 10, 7, 0);
+  
+  // ⏱ Timer-Text (NUR HIER ÄNDERN)
+const timerText = ({ days, hours, mins }) =>
+  `⏳ Noch <strong>${days}</strong> Tage, <strong>${hours}</strong> Std, <strong>${mins}</strong> Min bis wir uns wieder sehen 💖`;
 
   // Text unter "Ja" (du kannst hier alles reinschreiben)
   const customLoveText = `Auch wenn wir momentan weit voneinander entfernt sind, bist du jeden Moment ganz tief in meinem Herzen. Ich liebe dich schatz 💘`;
@@ -319,8 +323,8 @@
       return;
     }
 
-    const { days, hours, mins } = formatCountdown(diff);
-    timerEl.innerHTML = `⏳ Noch <strong>${days}</strong> Tage, <strong>${hours}</strong> Std, <strong>${mins}</strong> Min bis wir uns wieder sehen 💘`;
+    const t = formatCountdown(diff);
+      timerEl.innerHTML = timerText(t);
   }
 
   updateTimer();
@@ -388,6 +392,7 @@
 
 </body>
 </html>
+
 
 
 
