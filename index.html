@@ -52,7 +52,7 @@
     }
     .timer strong { opacity: 1; }
 
-    .buttons {
+   .buttons{
   position: relative;
   margin-top: 22px;
 
@@ -61,8 +61,10 @@
   align-items: center;
   gap: 18px;
 
-  min-height: 70px; /* Platz für springenden Nein-Button */
+  height: 84px;            /* feste Höhe -> Platz für springenden Button */
+  width: min(420px, 92vw); /* damit placeNo verlässlich ist */
 }
+
 
     }
 
@@ -226,18 +228,34 @@ const timerText = ({ days, hours, mins }) =>
   let difficulty = 1;
   let lastMove = 0;
   let noScale = 1;
+  let noPlacedOnce = false;
 
   function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
   function placeNo(x = null, y = null) {
-    const r = arena.getBoundingClientRect();
-    const b = noBtn.getBoundingClientRect();
-    const maxX = Math.max(0, r.width - b.width);
-    const maxY = Math.max(0, r.height - b.height);
+  const r = arena.getBoundingClientRect();
+  const b = noBtn.getBoundingClientRect();
 
-    noBtn.style.left = (x ?? Math.random() * maxX) + "px";
-    noBtn.style.top  = (y ?? Math.random() * maxY) + "px";
+  const maxX = Math.max(0, r.width - b.width);
+  const maxY = Math.max(0, r.height - b.height);
+
+  // Beim ersten Platzieren: rechts neben dem Ja-Button starten
+  if (!noPlacedOnce) {
+    noPlacedOnce = true;
+    const startX = Math.min(maxX, r.width * 0.65); // eher rechts
+    const startY = Math.min(maxY, (r.height - b.height) / 2); // mittig in der Arena
+    noBtn.style.left = startX + "px";
+    noBtn.style.top  = startY + "px";
+    return;
   }
+
+  const nx = (x ?? Math.random() * maxX);
+  const ny = (y ?? Math.random() * maxY);
+
+  noBtn.style.left = nx + "px";
+  noBtn.style.top  = ny + "px";
+}
+
 
   function shrinkNoBtn() {
     noScale = clamp(noScale - shrinkPerEvade, minNoScale, 1);
@@ -400,6 +418,7 @@ const timerText = ({ days, hours, mins }) =>
 
 </body>
 </html>
+
 
 
 
