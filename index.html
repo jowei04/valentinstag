@@ -145,6 +145,29 @@
       pointer-events: none;
       z-index: 0;
     }
+
+    /* 📱 Mobile Optimierung */
+@media (max-width: 480px) {
+  .buttons {
+    gap: 14px;
+    height: 96px;
+  }
+
+  button {
+    font-size: 20px;          /* größerer Text */
+    padding: 16px 24px;       /* größere Klickfläche */
+    border-radius: 18px;
+  }
+
+  #yes {
+    transform: scale(1.05);
+  }
+
+  #no {
+    min-width: 120px;
+  }
+}
+
   </style>
 </head>
 
@@ -418,6 +441,7 @@ const timerText = ({ days, hours, mins }) =>
 
 </body>
 </html>
+
 
 
 
